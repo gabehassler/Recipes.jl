@@ -15,7 +15,9 @@ Unitful.register(RecipeUnits)
 
 const UNITS = Dict(
     "g" => u"g",
-    "tsp" => u"tsp"
+    "tsp" => u"tsp",
+    "cup" => u"cup",
+    "cups" => u"cup"
 )
 
 struct Ingredient
@@ -126,12 +128,9 @@ const INGREDIENT_PATTERN = r"([^\(\)]*)\s*(?:\((.*)\))?(?:,\s*(.*))?" #r"(.*)\s*
 
 function parse_ingredient(s::AbstractString)
     m = match(INGREDIENT_PATTERN, s)
-    @show m
     if isnothing(m)
         error("could not parse ingredient: $s")
     end
-
-    @show m
 
     Ingredient(m[1], parse_amount(m[2]), m[3])
 end
@@ -141,6 +140,10 @@ function parse_amount(::Nothing)
 end
 
 function parse_number(s::AbstractString)
+    if contains(s, '/')
+        num, den = split(s, '/')
+        return parse(Int, num) // parse(Int, den)
+    end
     n = parse(Float64, s)
     try
         n = Int(n)
