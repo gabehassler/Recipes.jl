@@ -20,7 +20,7 @@ const UNITS = Dict(
 
 struct Ingredient
     name::String
-    quantity::Union{Quantity, MyQuantity, Nothing}
+    quantity::Union{Quantity, Nothing}
     prep::Union{String, Nothing}
 end
 
@@ -63,7 +63,7 @@ struct Recipe
     name::String
     ingredients::Vector{Ingredient}
     instructions::Vector{Instruction}
-    amount::Union{Quantity, MyQuantity}
+    amount::Quantity
 end
 
 function show(io::IO, r::Recipe)
@@ -159,13 +159,19 @@ function parse_amount(s::AbstractString)
         if s[2] in keys(UNITS)
             return n * UNITS[s[2]]
         else
-            return MyQuantity(n, s[2])
+            unit = s[2]
+            dim_name = unit * "Dim"
+            dim_name_long = unit * "Dimension"
+
+            @warn "unrecognized unit $unit. creating new unit"
+            dim = eval(:(@dimension $(Symbol(dim_name)) $dim_name $(Symbol(dim_name_long))))
+            u = eval(:(@refunit $(Symbol(unit)) $unit $(Symbol(unit)) $dim false))
+            return n * u
         end
     else
         error("not implemented")
     end
 end
-
 
 
 function parse_recipe(s::String)
@@ -182,11 +188,6 @@ function parse_recipe(s::String)
                   parse_amount(amt))
 
 end
-
-
-
-
-
 
 
 end # module
