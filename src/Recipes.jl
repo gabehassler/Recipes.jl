@@ -5,6 +5,8 @@ export Ingredient,
        Recipe
 
 using Unitful
+using DataFrames
+using CSV
 
 include("RecipeUnits.jl")
 
@@ -20,11 +22,44 @@ const UNITS = Dict(
     "cups" => u"cup"
 )
 
+
+struct Nutrient
+    name::String
+    quantity::Quantity
+end
+
+struct Nutrition
+    values::Vector{Quantity}
+    dict::DataFrame
+end
+
+function Nutrition(;
+    macros::Vector{Nutrient} = Nutrient[],
+    micros::Vector{Nutrient} = Nutrient[])
+
+    return Nutrition(macros, micros)
+end
+
 struct Ingredient
     name::String
     quantity::Union{Quantity, Nothing}
     prep::Union{String, Nothing}
+    nutrients::Union{Nutrition, Nothing}
 end
+
+function Ingredient(name::String;
+    quantity::Union{Quantity, Nothing} = nothing,
+    prep::Union{String, Nothing} = nothing,
+    nutrients::Union{Nutrition, Nothing} = nothing)
+
+    return Ingredient(name, quantity, prep, nutrients)
+end
+
+function Ingredient(name, quantity)
+    return Ingredient(name, quantity = quantity)
+end
+
+include("nutrition.jl")
 
 
 
@@ -126,13 +161,38 @@ end
 const INGREDIENT_PATTERN = r"([^\(\)]*)\s*(?:\((.*)\))?(?:,\s*(.*))?" #r"(.*)\s*(?:\((.*)\))?(?:,\s*(.*))?"
 
 
-function parse_ingredient(s::AbstractString)
+function parse_ingredient(s::AbstractString;
+                          ingredient_dict::Dict{String, String},
+                          nutrition_df::DataFrame,
+                          unit_df::DataFrame,
+                          require_nutrition::Bool = false)
     m = match(INGREDIENT_PATTERN, s)
     if isnothing(m)
         error("could not parse ingredient: $s")
     end
 
-    Ingredient(m[1], parse_amount(m[2]), m[3])
+    prep = isnothing(m[3]) ? nothing : String(m[3])
+
+    ingredient = String(strip(m[1]))
+    nutr_ingredient = ingredient
+    try
+        nutr_ingredient = ingredient_dict[ingredient]
+    catch
+        # do nothing
+    end
+
+    nutrients = parse_nutrition(nutrition_df, nutr_ingredient, unit_df)
+    if require_nutrition && isnothing(nutrients)
+        error("Cannot find '$nutr_ingredient' in nutrition file, and " *
+              "'require_nutrition = true'")
+    end
+
+
+
+    Ingredient(ingredient,
+               quantity = parse_amount(m[2]),
+               prep = prep,
+               nutrients = nutrients)
 end
 
 function parse_amount(::Nothing)
@@ -177,16 +237,23 @@ function parse_amount(s::AbstractString)
 end
 
 
-function parse_recipe(s::String)
+function parse_recipe(s::String; require_nutrition::Bool = false)
     lines = readlines(s)
 
     name, i = find_next_single(lines, RECIPE)
     amt, i = find_next_single(lines, MAKES, start = i)
     ingredients, i = find_next_list(lines, INGREDIENTS, start = i)
     instructions, _ = find_next_list(lines, INSTRUCTIONS, start = i)
-
+    idf = CSV.read(SIMPLE_DICT, DataFrame)
+    ingredient_dict = Dict(String(idf.short[i]) => String(idf.long[i]) for i in 1:nrow(idf))
+    nutrition = CSV.read(NUTRITION_PATH, DataFrame)
+    units = CSV.read(NUTRITION_DICT, DataFrame)
     return Recipe(name,
-                  parse_ingredient.(ingredients),
+                  parse_ingredient.(ingredients,
+                                    ingredient_dict = ingredient_dict,
+                                    nutrition_df = nutrition,
+                                    unit_df = units,
+                                    require_nutrition = require_nutrition),
                   Instruction.(instructions),
                   parse_amount(amt))
 

@@ -5,7 +5,7 @@ export MyQuantity
 using Unitful
 
 
-@dimension amt "amount" Amount
+@dimension amt "amount" Qnty
 @refunit count "count" Count amt false
 
 @unit tsp "tsp" TeaSpoon 4.92892u"mL" false
