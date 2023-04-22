@@ -72,7 +72,14 @@ end
 
 import Base.*
 function *(s::Real, x::Ingredient)
-    Ingredient(x.name, s * x.quantity, x.prep)
+    nutrients = x.nutrients
+    if !isnothing(nutrients)
+        nutrients = Nutrition(nutrients.values * s, nutrients.dict)
+    end
+    Ingredient(x.name,
+               s * x.quantity,
+               x.prep,
+               nutrients)
 end
 
 function *(x::Ingredient, s::Real)
