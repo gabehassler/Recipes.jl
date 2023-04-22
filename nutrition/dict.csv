@@ -1,36 +1,36 @@
 variable	name	unit	type	parent
-Data.Alpha Carotene	Alpha Carotene	mcg	micro	
-Data.Beta Carotene	Beta Carotene	mcg	micro	
-Data.Beta Cryptoxanthin	Beta Cryptoxanthin	mcg	micro	
-Data.Carbohydrate	Carbohydrate	g	macro	
-Data.Cholesterol	Cholesterol	mg	micro	
-Data.Choline	Choline	mg	micro	
+Data.Alpha Carotene	Alpha Carotene	mcg	micro
+Data.Beta Carotene	Beta Carotene	mcg	micro
+Data.Beta Cryptoxanthin	Beta Cryptoxanthin	mcg	micro
+Data.Carbohydrate	Carbohydrate	g	macro
+Data.Cholesterol	Cholesterol	mg	micro
+Data.Choline	Choline	mg	micro
 Data.Fiber	Fiber	g	macro	Carbohydrate
-Data.Lutein and Zeaxanthin	Lutein and Zeaxanthin	mcg	micro	
-Data.Lycopene	Lycopene	mcg	micro	
-Data.Niacin	Niacin	mg	micro	
-Data.Protein	Protein	g	macro	
-Data.Retinol	Retinol	mcg	micro	
-Data.Riboflavin	Riboflavin	mg	micro	
-Data.Selenium	Selenium	mcg	micro	
+Data.Lutein and Zeaxanthin	Lutein and Zeaxanthin	mcg	micro
+Data.Lycopene	Lycopene	mcg	micro
+Data.Niacin	Niacin	mg	micro
+Data.Protein	Protein	g	macro
+Data.Retinol	Retinol	mcg	micro
+Data.Riboflavin	Riboflavin	mg	micro
+Data.Selenium	Selenium	mcg	micro
 Data.Sugar Total	Sugar	g	macro	Carbohydrate
-Data.Thiamin	Thiamin	mcg	micro	
-Data.Water	Water	g	macro	
+Data.Thiamin	Thiamin	mcg	micro
+Data.Water	Water	g	macro
 Data.Fat.Monosaturated Fat	Monounsaturated Fat	g	macro	Fat
 Data.Fat.Polysaturated Fat	Polyunsaturated Fat	g	macro	Fat
 Data.Fat.Saturated Fat	Saturated Fat	g	macro	Fat
-Data.Fat.Total Lipid	Fat	g	macro	
-Data.Major Minerals.Calcium	Calcium	mg	micro	
-Data.Major Minerals.Copper	Copper	mg	micro	
-Data.Major Minerals.Iron	Iron	mg	micro	
-Data.Major Minerals.Magnesium	Magnesium	mg	micro	
-Data.Major Minerals.Phosphorus	Phosphorus	mg	micro	
-Data.Major Minerals.Potassium	Potassium	mg	micro	
-Data.Major Minerals.Sodium	Sodium	mg	micro	
-Data.Major Minerals.Zinc	Zink	mg	micro	
-Data.Vitamins.Vitamin A - RAE	Vitamin A	mcg	micro	
-Data.Vitamins.Vitamin B12	Vitamin B12	mcg	micro	
-Data.Vitamins.Vitamin B6	Vitamin B6	mg	micro	
-Data.Vitamins.Vitamin C	Vitamin C	mg	micro	
-Data.Vitamins.Vitamin E	Vitamin E	mg	micro	
-Data.Vitamins.Vitamin K	Vitamin K	mcg	micro	
+Data.Fat.Total Lipid	Fat	g	macro
+Data.Major Minerals.Calcium	Calcium	mg	micro
+Data.Major Minerals.Copper	Copper	mg	micro
+Data.Major Minerals.Iron	Iron	mg	micro
+Data.Major Minerals.Magnesium	Magnesium	mg	micro
+Data.Major Minerals.Phosphorus	Phosphorus	mg	micro
+Data.Major Minerals.Potassium	Potassium	mg	micro
+Data.Major Minerals.Sodium	Sodium	mg	micro
+Data.Major Minerals.Zinc	Zinc	mg	micro
+Data.Vitamins.Vitamin A - RAE	Vitamin A	mcg	micro
+Data.Vitamins.Vitamin B12	Vitamin B12	mcg	micro
+Data.Vitamins.Vitamin B6	Vitamin B6	mg	micro
+Data.Vitamins.Vitamin C	Vitamin C	mg	micro
+Data.Vitamins.Vitamin E	Vitamin E	mg	micro
+Data.Vitamins.Vitamin K	Vitamin K	mcg	micro

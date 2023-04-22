@@ -257,7 +257,7 @@ function parse_recipe(s::String; require_nutrition::Bool = false)
     idf = CSV.read(SIMPLE_DICT, DataFrame)
     ingredient_dict = Dict(String(idf.short[i]) => String(idf.long[i]) for i in 1:nrow(idf))
     nutrition = CSV.read(NUTRITION_PATH, DataFrame)
-    units = CSV.read(NUTRITION_DICT, DataFrame)
+    units = CSV.read(NUTRITION_DICT, DataFrame, delim = '\t')
     return Recipe(name,
                   parse_ingredient.(ingredients,
                                     ingredient_dict = ingredient_dict,
@@ -267,6 +267,24 @@ function parse_recipe(s::String; require_nutrition::Bool = false)
                   Instruction.(instructions),
                   parse_amount(amt))
 
+end
+
+function nutrition_facts(recipe::Recipe)
+    ingredients = recipe.ingredients
+    nutrients = [i.nutrients for i in ingredients]
+    n = length(nutrients)
+    if !isnothing(findfirst(isnothing, nutrients))
+        error("Some ingredients do not have nutrition information")
+    end
+    dict = deepcopy(nutrients[1].dict)
+    quants = deepcopy(nutrients[1].values)
+    for i = 2:n
+        @assert nutrients[i].dict === nutrients[1].dict
+        quants += nutrients[i].values
+    end
+
+    dict[!, "quantity"] = quants
+    format_nutrition(dict)
 end
 
 

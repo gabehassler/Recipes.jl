@@ -34,6 +34,9 @@ const UNIT_DICT = Dict("g" => 1u"g",
                        "mg" => 1u"mg",
                        "mcg" => 1u"μg")
 const REF_WEIGHT = 100u"g"
+const CALORIE_DICT = Dict("Carbohydrate" => 4u"cal" / 1u"g",
+                          "Protein" => 4u"cal" / 1u"g",
+                          "Fat" => 9u"cal" / 1u"g")
 
 function parse_nutrition(key::String;
                          nutrition_path::String = NUTRITION_PATH,
@@ -53,21 +56,43 @@ function parse_nutrition(df::DataFrame, food::String, dict::DataFrame)
     return Nutrition(quants, dict)
 end
 
-function nutrition_facts(recipe::Recipe)
-    ingredients = recipe.ingredients
-    nutrients = [i.nutrients for i in ingredients]
-    n = length(nutrients)
-    if !isnothing(findfirst(isnothing, nutrients))
-        error("Some ingredients do not have nutrition information")
+
+
+function get_calories(food::String, quant::Quantity)
+    quant = uconvert(u"g", quant)
+    try
+        return quant * CALORIE_DICT[food]
+    catch
+        return 0.0u"cal"
     end
-    dict = deepcopy(nutrients[1].dict)
-    quants = deepcopy(nutrients[1].values)
-    for i = 2:n
-        @assert nutrients[i].dict === nutrients[1].dict
-        quants += nutrients[i].values
+end
+
+function format_nutrition(df::DataFrame)
+
+    types = ["macro", "micro"]
+
+    tb = DataFrame(nutrient = String[], quantity = Quantity[])
+    for tp in types
+        inds = findall(df.type .== tp)
+        @show inds
+        dfs = df[inds, :]
+        full_inds = findall(ismissing, dfs.parent)
+        full_nms = dfs.name[full_inds]
+        sp = sortperm(full_nms)
+        full_inds = full_inds[sp]
+        full_nms = dfs.name[full_inds]
+        tb = vcat(tb, DataFrame(nutrient = full_nms, quantity = dfs.quantity[full_inds]))
+
     end
 
-    dict[!, "quantity"] = quants
-    dict
+    @show tb
+
+    cals = [get_calories(tb.nutrient[i], tb.quantity[i]) for i = 1:nrow(tb)]
+    @show cals
+    total_cals = sum(cals)
+    cal_percs = cals / total_cals
+    tb[!, "cal_percs"] = cal_percs * 100
+    tb
 end
+
 
