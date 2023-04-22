@@ -2,7 +2,8 @@ module Recipes
 
 export Ingredient,
        Instruction,
-       Recipe
+       Recipe,
+       nutrition_facts
 
 using Unitful
 using DataFrames
@@ -23,22 +24,11 @@ const UNITS = Dict(
 )
 
 
-struct Nutrient
-    name::String
-    quantity::Quantity
-end
-
 struct Nutrition
     values::Vector{Quantity}
     dict::DataFrame
 end
 
-function Nutrition(;
-    macros::Vector{Nutrient} = Nutrient[],
-    micros::Vector{Nutrient} = Nutrient[])
-
-    return Nutrition(macros, micros)
-end
 
 struct Ingredient
     name::String
@@ -186,6 +176,19 @@ function parse_ingredient(s::AbstractString;
         error("Cannot find '$nutr_ingredient' in nutrition file, and " *
               "'require_nutrition = true'")
     end
+
+    quant = parse_amount(m[2])
+    if !isnothing(nutrients)
+        if dimension(quant) == dimension(REF_WEIGHT)
+            nutrients.values .*= uconvert(unit(REF_WEIGHT), quant) / REF_WEIGHT
+        elseif require_nutrition
+            error("the specified quantity is '$quant', which is not a mass." *
+                  "nutrition information is only available by mass/weight")
+        else
+            nutrients = nothing
+        end
+    end
+
 
 
 

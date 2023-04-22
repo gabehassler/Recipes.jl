@@ -33,6 +33,7 @@ const SIMPLE_DICT = "../nutrition/simple_names.csv"
 const UNIT_DICT = Dict("g" => 1u"g",
                        "mg" => 1u"mg",
                        "mcg" => 1u"μg")
+const REF_WEIGHT = 100u"g"
 
 function parse_nutrition(key::String;
                          nutrition_path::String = NUTRITION_PATH,
@@ -52,4 +53,21 @@ function parse_nutrition(df::DataFrame, food::String, dict::DataFrame)
     return Nutrition(quants, dict)
 end
 
+function nutrition_facts(recipe::Recipe)
+    ingredients = recipe.ingredients
+    nutrients = [i.nutrients for i in ingredients]
+    n = length(nutrients)
+    if !isnothing(findfirst(isnothing, nutrients))
+        error("Some ingredients do not have nutrition information")
+    end
+    dict = deepcopy(nutrients[1].dict)
+    quants = deepcopy(nutrients[1].values)
+    for i = 2:n
+        @assert nutrients[i].dict === nutrients[1].dict
+        quants += nutrients[i].values
+    end
+
+    dict[!, "quantity"] = quants
+    dict
+end
 
