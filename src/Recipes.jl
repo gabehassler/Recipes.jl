@@ -257,7 +257,7 @@ function parse_recipe(s::String; require_nutrition::Bool = false)
     idf = CSV.read(SIMPLE_DICT, DataFrame)
     ingredient_dict = Dict(String(idf.short[i]) => String(idf.long[i]) for i in 1:nrow(idf))
     nutrition = CSV.read(NUTRITION_PATH, DataFrame)
-    units = CSV.read(NUTRITION_DICT, DataFrame, delim = '\t')
+    units = CSV.read(NUTRITION_DICT, DataFrame)
     return Recipe(name,
                   parse_ingredient.(ingredients,
                                     ingredient_dict = ingredient_dict,
