@@ -32,7 +32,9 @@ const NUTRITION_DICT = "../nutrition/dict.csv"
 const SIMPLE_DICT = "../nutrition/simple_names.csv"
 const UNIT_DICT = Dict("g" => 1u"g",
                        "mg" => 1u"mg",
-                       "mcg" => 1u"μg")
+                       "mcg" => 1u"μg",
+                       "μg" => 1u"μg",
+                       "IU" => 1/40 * 1u"μg")
 const REF_WEIGHT = 100u"g"
 const CALORIE_DICT = Dict("Carbohydrate" => 4u"cal" / 1u"g",
                           "Protein" => 4u"cal" / 1u"g",
