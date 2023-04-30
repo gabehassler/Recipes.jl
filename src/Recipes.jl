@@ -76,14 +76,14 @@ end
 
 import Base.*
 function *(s::Real, x::Ingredient)
-    nutrients = x.nutrients
-    if !isnothing(nutrients)
-        nutrients = Nutrition(nutrients.values * s, nutrients.dict)
-    end
+    # nutrients = x.nutrients
+    # if !isnothing(nutrients)
+    #     nutrients = Nutrition(nutrients.values * s, nutrients.dict)
+    # end
     Ingredient(x.name,
-               s * x.quantity,
+               x.quantity * s,
                x.prep,
-               nutrients)
+               x.nutrients * s)
 end
 
 function *(x::Ingredient, s::Real)
@@ -92,6 +92,10 @@ end
 
 *(s::Real, x::Nothing) = nothing
 *(x::Nothing, s::Real) = s * x
+
+function *(x::Nutrition, s::Real)
+    Nutrition(x.nutrients, x.quantities * s, x.reference_weight * s)
+end
 
 struct Instruction
     instruction::String
@@ -192,7 +196,7 @@ function parse_ingredient(s::AbstractString;
     if !isnothing(nutrients)
         ref_weight = nutrients.reference_weight
         if dimension(quant) == dimension(ref_weight)
-            nutrients.quantities .*= uconvert(unit(ref_weight), quant) / ref_weight
+            nutrients = nutrients * (uconvert(unit(ref_weight), quant) / ref_weight)
         elseif require_nutrition
             error("the specified quantity is '$quant', which is not a mass." *
                   "nutrition information is only available by mass/weight")
@@ -274,18 +278,42 @@ function parse_recipe(s::String; require_nutrition::Bool = false)
 
 end
 
-function nutrition_facts(recipe::Recipe)
+function nutrition_facts(recipe::Recipe;
+                         dict = CSV.read(NUTRIENTS_DICT, DataFrame))
     ingredients = recipe.ingredients
     nutrients = [i.nutrients for i in ingredients]
     n = length(nutrients)
     if !isnothing(findfirst(isnothing, nutrients))
         error("Some ingredients do not have nutrition information")
     end
-    dict = deepcopy(nutrients[1].dict)
-    quants = deepcopy(nutrients[1].values)
-    for i = 2:n
-        @assert nutrients[i].dict === nutrients[1].dict
-        quants += nutrients[i].values
+    # dict = deepcopy(nutrients[1].dict)
+    # quants = deepcopy(nutrients[1].values)
+    # for i = 2:n
+    #     @assert nutrients[i].dict === nutrients[1].dict
+    #     quants += nutrients[i].values
+    # end
+
+    all_nutrients = dict.name
+    quants = Vector{Union{Missing, Quantity}}(undef, length(all_nutrients))
+    some_missing = fill(false, length(all_nutrients))
+    fill!(quants, missing)
+    for i = 1:length(nutrients)
+        for j = 1:length(all_nutrients)
+            ind = findfirst(isequal(all_nutrients[j]), nutrients[i].nutrients)
+            # if isnothing(ind)
+            #     error("Cannot find $(all_nutrients[j]) in $(nutrients[i].nutrients)")
+            # end
+            quant = isnothing(ind) ? missing : nutrients[i].quantities[ind]
+            # quant = nutrients[i].quantities[ind]
+
+            if ismissing(quant)
+                some_missing[j] = true
+            elseif ismissing(quants[j])
+                quants[j] = quant
+            else
+                quants[j] += quant
+            end
+        end
     end
 
     dict[!, "quantity"] = quants

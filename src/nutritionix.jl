@@ -38,7 +38,8 @@ function parse_nutrition(json;
     for nutrient in nutrients
         id = nutrient[:attr_id]
         ind = findfirst(isequal(id), dict.attr_id)
-        name = ismissing(dict.pretty[ind]) ? dict.name[ind] : dict.pretty[ind]
+        # name = ismissing(dict.pretty[ind]) ? dict.name[ind] : dict.pretty[ind]
+        name = dict.name[ind]
         df[!, name] = [nutrient[:value]] * UNIT_DICT[dict.unit[ind]]
     end
     df
