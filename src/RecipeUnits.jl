@@ -11,6 +11,6 @@ using Unitful
 @unit tsp "tsp" TeaSpoon 4.92892u"mL" false
 @unit cup "cup" Cup 0.236588u"L" false
 
-@unit kcal "kcal" KCal 4184u"J" false
+# @unit kcal "kcal" KCal 4184u"J" false
 
 end

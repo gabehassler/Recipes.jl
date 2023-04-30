@@ -5,12 +5,13 @@ using DataFrames
 using CSV
 using Unitful
 
-include("RecipeUnits.jl")
-Unitful.register(RecipeUnits)
+# include("RecipeUnits.jl")
+# Unitful.register(RecipeUnits)
 
-include("nutritionix_keys.jl")
+# include("nutritionix_keys.jl")
 
-const NUTRIENTS_PATH = "./nutrition/nutrition.csv"
+const NUTRIENTS_PATH = "../nutrition/nutrition.csv"
+const NUTRIENTS_DICT = "../nutrition/nutrition_dict.csv"
 
 const UNIT_DICT = Dict("g" => 1u"g",
                        "mg" => 1u"mg",
@@ -22,7 +23,7 @@ const UNIT_DICT = Dict("g" => 1u"g",
                        "μg" => 1u"μg")
 
 function parse_nutrition(json;
-                         dict::DataFrame = CSV.read("./nutrition/nutrition_dict.csv", DataFrame))
+                         dict::DataFrame = CSV.read(NUTRIENTS_DICT, DataFrame))
     df = DataFrame(
         food = json[:food_name],
         quantity = json[:serving_weight_grams] * u"g"
@@ -89,6 +90,7 @@ function get_nutrient(s::String;
         if isnothing(ind)
             dfs = parse_nutrition(json[1])
             nutrients_df = vcat(nutrients_df, dfs, cols = :union)
+
             CSV.write(NUTRIENTS_PATH, nutrients_df)
             ind = nrow(nutrients_df)
         else
@@ -97,7 +99,11 @@ function get_nutrient(s::String;
         end
     end
 
-    ind
+    nutrients = names(nutrients_df)[3:end]
+
+    return (nutrients = nutrients,
+            quantities = [nutrients_df[ind, n] for n in nutrients],
+            ref = nutrients_df.quantity[ind])
 end
 
 function missing_sum(x::AbstractArray{<:Union{Quantity, Missing}})
@@ -132,14 +138,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-parse_nutrition(y[1])
-x = get_nutrients(["tofu", "brown rice"])
+# parse_nutrition(y[1])
+# x = get_nutrients(["tofu", "brown rice"])
 # curl --header "Content-Type: application/json" --header "x-app-id: 8ac8e3ee" --header "x-app-key: 7f2f5b5e827060a7ee44f03cace825a4" --header "x-remote-user-id: 0" -X POST --data "{\"query\":\"butter\"}" https://trackapi.nutritionix.com/v2/natural/nutrients

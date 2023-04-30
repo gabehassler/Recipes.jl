@@ -30,34 +30,33 @@
 const NUTRITION_PATH = "../nutrition/food.csv"
 const NUTRITION_DICT = "../nutrition/dict.csv"
 const SIMPLE_DICT = "../nutrition/simple_names.csv"
-const UNIT_DICT = Dict("g" => 1u"g",
-                       "mg" => 1u"mg",
-                       "mcg" => 1u"μg",
-                       "μg" => 1u"μg",
-                       "IU" => 1/40 * 1u"μg")
-const REF_WEIGHT = 100u"g"
+# const UNIT_DICT = Dict("g" => 1u"g",
+#                        "mg" => 1u"mg",
+#                        "mcg" => 1u"μg",
+#                        "μg" => 1u"μg",
+#                        "IU" => 1/40 * 1u"μg")
+# const REF_WEIGHT = 100u"g"
 const CALORIE_DICT = Dict("Carbohydrate" => 4u"cal" / 1u"g",
                           "Protein" => 4u"cal" / 1u"g",
                           "Fat" => 9u"cal" / 1u"g",
                           "Fiber" => 2u"cal" / 1u"g")
 
-function parse_nutrition(key::String;
-                         nutrition_path::String = NUTRITION_PATH,
-                         dict_path::String = NUTRITION_DICT)
-    parse_nutrient(CSV.read(nutrition_path, DataFrame), key, CSV.read(dict_path, DataFrame))
+function parse_nutrition(key::String)
+    nutrients, quants, ref = get_nutrient(key)
+    return Nutrition(nutrients, quants, ref)
 end
 
-function parse_nutrition(df::DataFrame, food::String, dict::DataFrame)
-    ind = findfirst(x -> x == food, df.Description)
-    if isnothing(ind)
-        return nothing
-    end
+# function parse_nutrition(df::DataFrame, food::String, dict::DataFrame)
+#     ind = findfirst(x -> x == food, df.Description)
+#     if isnothing(ind)
+#         return nothing
+#     end
 
-    nutr_inds = 4:ncol(df)
-    @assert names(df)[nutr_inds] == dict.variable
-    quants = [df[ind, nutr_inds[i]] * UNIT_DICT[dict.unit[i]] for i = 1:nrow(dict)]
-    return Nutrition(quants, dict)
-end
+#     nutr_inds = 4:ncol(df)
+#     @assert names(df)[nutr_inds] == dict.variable
+#     quants = [df[ind, nutr_inds[i]] * UNIT_DICT[dict.unit[i]] for i = 1:nrow(dict)]
+#     return Nutrition(quants, dict)
+# end
 
 
 

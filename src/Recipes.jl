@@ -25,8 +25,9 @@ const UNITS = Dict(
 
 
 struct Nutrition
-    values::Vector{Quantity}
-    dict::DataFrame
+    nutrients::Vector{String}
+    quantities::Vector{<:Union{Missing, Quantity}}
+    reference_weight::Quantity
 end
 
 
@@ -50,6 +51,9 @@ function Ingredient(name, quantity)
 end
 
 include("nutrition.jl")
+include("nutritionix_keys.jl")
+include("nutritionix.jl")
+
 
 
 
@@ -159,9 +163,9 @@ const INGREDIENT_PATTERN = r"([^\(\)]*)\s*(?:\((.*)\))?(?:,\s*(.*))?" #r"(.*)\s*
 
 
 function parse_ingredient(s::AbstractString;
-                          ingredient_dict::Dict{String, String},
-                          nutrition_df::DataFrame,
-                          unit_df::DataFrame,
+                        #   ingredient_dict::Dict{String, String},
+                        #   nutrition_df::DataFrame,
+                        #   unit_df::DataFrame,
                           require_nutrition::Bool = false)
     m = match(INGREDIENT_PATTERN, s)
     if isnothing(m)
@@ -171,14 +175,14 @@ function parse_ingredient(s::AbstractString;
     prep = isnothing(m[3]) ? nothing : String(m[3])
 
     ingredient = String(strip(m[1]))
-    nutr_ingredient = ingredient
-    try
-        nutr_ingredient = ingredient_dict[ingredient]
-    catch
-        # do nothing
-    end
+    # nutr_ingredient = ingredient
+    # try
+    #     nutr_ingredient = ingredient_dict[ingredient]
+    # catch
+    #     # do nothing
+    # end
+    nutrients = require_nutrition ? parse_nutrition(ingredient) : nothing
 
-    nutrients = parse_nutrition(nutrition_df, nutr_ingredient, unit_df)
     if require_nutrition && isnothing(nutrients)
         error("Cannot find '$nutr_ingredient' in nutrition file, and " *
               "'require_nutrition = true'")
@@ -186,8 +190,9 @@ function parse_ingredient(s::AbstractString;
 
     quant = parse_amount(m[2])
     if !isnothing(nutrients)
-        if dimension(quant) == dimension(REF_WEIGHT)
-            nutrients.values .*= uconvert(unit(REF_WEIGHT), quant) / REF_WEIGHT
+        ref_weight = nutrients.reference_weight
+        if dimension(quant) == dimension(ref_weight)
+            nutrients.quantities .*= uconvert(unit(ref_weight), quant) / ref_weight
         elseif require_nutrition
             error("the specified quantity is '$quant', which is not a mass." *
                   "nutrition information is only available by mass/weight")
@@ -254,15 +259,15 @@ function parse_recipe(s::String; require_nutrition::Bool = false)
     amt, i = find_next_single(lines, MAKES, start = i)
     ingredients, i = find_next_list(lines, INGREDIENTS, start = i)
     instructions, _ = find_next_list(lines, INSTRUCTIONS, start = i)
-    idf = CSV.read(SIMPLE_DICT, DataFrame)
-    ingredient_dict = Dict(String(idf.short[i]) => String(idf.long[i]) for i in 1:nrow(idf))
-    nutrition = CSV.read(NUTRITION_PATH, DataFrame)
-    units = CSV.read(NUTRITION_DICT, DataFrame)
+    # idf = CSV.read(SIMPLE_DICT, DataFrame)
+    # ingredient_dict = Dict(String(idf.short[i]) => String(idf.long[i]) for i in 1:nrow(idf))
+    # nutrition = CSV.read(NUTRITION_PATH, DataFrame)
+    # units = CSV.read(NUTRITION_DICT, DataFrame)
     return Recipe(name,
                   parse_ingredient.(ingredients,
-                                    ingredient_dict = ingredient_dict,
-                                    nutrition_df = nutrition,
-                                    unit_df = units,
+                                    # ingredient_dict = ingredient_dict,
+                                    # nutrition_df = nutrition,
+                                    # unit_df = units,
                                     require_nutrition = require_nutrition),
                   Instruction.(instructions),
                   parse_amount(amt))
