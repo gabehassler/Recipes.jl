@@ -71,10 +71,10 @@ end
 
 function format_nutrition(df::DataFrame)
 
-    types = ["macro", "mineral"]
+    types = ["General", "Macro", "Mineral", "Vitamin", "Amino Acid"]
     # df = deepcopy(df)
     # df.name .= string.([x -> ismissing(df.pretty[x]) ? df.name[x] : df.pretty[x] for x = 1:nrow(df)])
-    tb = DataFrame(nutrient = String[], quantity = Quantity[], is_sub = Bool[])
+    tb = DataFrame(nutrient = String[], quantity = Quantity[], is_sub = Bool[], type = String[])
     for tp in types
         inds = findall(x -> !ismissing(x) && x == tp, df.category)
         dfs = df[inds, :]
@@ -95,7 +95,10 @@ function format_nutrition(df::DataFrame)
             insert!(qts, pind + 1, qt)
             insert!(is_sub, pind + 1, true)
         end
-        tb = vcat(tb, DataFrame(nutrient = full_nms, quantity = qts, is_sub = is_sub))
+        tb = vcat(tb, DataFrame(nutrient = full_nms,
+                                quantity = qts,
+                                is_sub = is_sub,
+                                type = tp))
     end
 
     for i = 1:nrow(tb)
@@ -144,8 +147,11 @@ function format_nutrition(df::DataFrame)
     # max_cal = maximum(length.(tb.pretty_cal))
     # tb[!, "pretty_perc"] = [isnothing(x) ? "" : string(round(x, digits = 1)) * "%" for x in tb.cal_percs]
     # max_perc = maximum(length.(tb.pretty_perc))
-    s = "Nutrition Facts:\n"
+    s = "Nutrition Facts:\n\n"
     for i = 1:nrow(tb)
+        if i == 1 || tb.type[i] != tb.type[i - 1]
+            s *= tb.type[i] * "\n"
+        end
         s *= "\t" * pad_string(tb.pretty[i], max_name, side = :right)
         s *= "   " * pad_string(tb.pretty_quant[i], max_quant, side = :left)
         # s *= "   " * pad_string(tb.pretty_cal[i], max_cal, side = :left)
@@ -177,6 +183,10 @@ function pretty_quant(q::Quantity; kwargs...)
         u = pad_string(u, 2, side = :left)
     end
     return string(x) * " " * u
+end
+
+function pretty_quant(::Missing; kwargs...)
+    return "?"
 end
 
 function pretty_quant(q::Nothing; kwargs...)

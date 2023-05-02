@@ -91,7 +91,7 @@ function get_nutrient(s::String;
         if isnothing(ind)
             dfs = parse_nutrition(json[1])
             nutrients_df = vcat(nutrients_df, dfs, cols = :union)
-
+            nutrients_df.Energy = uconvert.(u"kcal", nutrients_df.Energy)
             CSV.write(NUTRIENTS_PATH, nutrients_df)
             ind = nrow(nutrients_df)
         else
