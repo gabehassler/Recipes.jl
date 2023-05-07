@@ -74,7 +74,11 @@ function format_nutrition(df::DataFrame)
     types = ["General", "Macro", "Mineral", "Vitamin", "Amino Acid"]
     # df = deepcopy(df)
     # df.name .= string.([x -> ismissing(df.pretty[x]) ? df.name[x] : df.pretty[x] for x = 1:nrow(df)])
-    tb = DataFrame(nutrient = String[], quantity = Quantity[], is_sub = Bool[], type = String[])
+    tb = DataFrame(nutrient = String[],
+                   quantity = Quantity[],
+                   is_sub = Bool[],
+                   type = String[],
+                   some_missing = Bool[])
     for tp in types
         inds = findall(x -> !ismissing(x) && x == tp, df.category)
         dfs = df[inds, :]
@@ -85,6 +89,7 @@ function format_nutrition(df::DataFrame)
         full_nms = dfs.name[full_inds]
         qts = dfs.quantity[full_inds]
         is_sub = fill(false, length(full_inds))
+        some_missing = dfs.some_missing[full_inds]
 
         sub_inds = setdiff(1:nrow(dfs), full_inds)
         for ind in sub_inds
@@ -94,11 +99,13 @@ function format_nutrition(df::DataFrame)
             insert!(full_nms, pind + 1, dfs.name[ind])
             insert!(qts, pind + 1, qt)
             insert!(is_sub, pind + 1, true)
+            insert!(some_missing, pind + 1, dfs.some_missing[ind])
         end
         tb = vcat(tb, DataFrame(nutrient = full_nms,
                                 quantity = qts,
                                 is_sub = is_sub,
-                                type = tp))
+                                type = tp,
+                                some_missing = some_missing))
     end
 
     for i = 1:nrow(tb)
@@ -152,7 +159,8 @@ function format_nutrition(df::DataFrame)
         if i == 1 || tb.type[i] != tb.type[i - 1]
             s *= tb.type[i] * "\n"
         end
-        s *= "\t" * pad_string(tb.pretty[i], max_name, side = :right)
+        nm = tb.some_missing[i] ? tb.pretty[i] * "*" : tb.pretty[i]
+        s *= "\t" * pad_string(nm, max_name, side = :right)
         s *= "   " * pad_string(tb.pretty_quant[i], max_quant, side = :left)
         # s *= "   " * pad_string(tb.pretty_cal[i], max_cal, side = :left)
         # s *= "   " * pad_string(tb.pretty_perc[i], max_perc, side = :left)

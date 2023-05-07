@@ -317,6 +317,7 @@ function nutrition_facts(recipe::Recipe;
     end
 
     dict[!, "quantity"] = quants
+    dict[!, "some_missing"] = some_missing
     format_nutrition(dict)
 end
 
