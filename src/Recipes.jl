@@ -335,7 +335,7 @@ function nutrition_facts(recipe::Recipe;
     requirements.max_requirement = [r[2] for r in reqs]
     # requirements.min_requirement = requirements.min_requirement .* (cals / 1000u"kcal")
     dict = outerjoin(dict, requirements, on = [:name => :nutrient])
-    format_nutrition(dict)
+    format_nutrition(dict, total_weight)
 end
 
 function parse_and_scale_requirement(requirements, ind, calories, dry_weight)

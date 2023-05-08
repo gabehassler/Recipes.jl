@@ -69,18 +69,18 @@ function get_calories(food::String, quant::Quantity)
     end
 end
 
-function format_nutrition(df::DataFrame)
+function format_nutrition(df::DataFrame, weight::Quantity)
 
     types = ["General", "Macro", "Mineral", "Vitamin", "Amino Acid"]
     # df = deepcopy(df)
     # df.name .= string.([x -> ismissing(df.pretty[x]) ? df.name[x] : df.pretty[x] for x = 1:nrow(df)])
-    tb = DataFrame(nutrient = String[],
-                   quantity = Quantity[],
-                   is_sub = Bool[],
-                   type = String[],
-                   some_missing = Bool[],
-                   minimum = Quantity[],
-                   maximum = Quantity[])
+    tb = DataFrame(nutrient = "Total Weight",
+                   quantity = weight,
+                   is_sub = false,
+                   type = "General",
+                   some_missing = false,
+                   minimum = missing,
+                   maximum = missing)
     for tp in types
         inds = findall(x -> !ismissing(x) && x == tp, df.category)
         dfs = df[inds, :]
@@ -119,7 +119,7 @@ function format_nutrition(df::DataFrame)
     for i = 1:nrow(tb)
         n = tb.nutrient[i]
         ind = findfirst(isequal(n), df.name)
-        if !ismissing(df.pretty[ind])
+        if !isnothing(ind) && !ismissing(df.pretty[ind])
             tb.nutrient[i] = df.pretty[ind]
         end
     end
@@ -187,6 +187,7 @@ function format_nutrition(df::DataFrame)
         q = tb.quantity[i]
         mn = tb.minimum[i]
         mx = tb.maximum[i]
+        q = ismissing(q) ? q : convert(Quantity{Float64}, q)
         mn = ismissing(mn) ? mn : convert(Quantity{Float64}, mn) # not sure why I need this?
         mx = ismissing(mx) ? mx : convert(Quantity{Float64}, mx) # not sure why I need this?
 
