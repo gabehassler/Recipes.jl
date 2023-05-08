@@ -279,7 +279,8 @@ function parse_recipe(s::String; require_nutrition::Bool = false)
 end
 
 function nutrition_facts(recipe::Recipe;
-                         dict = CSV.read(NUTRIENTS_DICT, DataFrame))
+                         dict = CSV.read(NUTRIENTS_DICT, DataFrame),
+                         requirements = CSV.read(MINIMUM_NUTRITION, DataFrame))
     ingredients = recipe.ingredients
     nutrients = [i.nutrients for i in ingredients]
     n = length(nutrients)
@@ -318,6 +319,12 @@ function nutrition_facts(recipe::Recipe;
 
     dict[!, "quantity"] = quants
     dict[!, "some_missing"] = some_missing
+    requirements.minimum_requirement = requirements.minimum_requirement .*
+            [UNIT_DICT[x] for x in requirements.unit_requirement]
+    cals_ind = findfirst(isequal("Energy"), dict.name)
+    cals = dict.quantity[cals_ind]
+    requirements.minimum_requirement = requirements.minimum_requirement .* (cals / 1000u"kcal")
+    dict = outerjoin(dict, requirements, on = [:name => :nutrient])
     format_nutrition(dict)
 end
 

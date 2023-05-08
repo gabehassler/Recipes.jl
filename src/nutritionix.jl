@@ -12,6 +12,7 @@ using Unitful
 
 const NUTRIENTS_PATH = "../nutrition/nutrition.csv"
 const NUTRIENTS_DICT = "../nutrition/nutrition_dict.csv"
+const MINIMUM_NUTRITION = "../nutrition/minimum_nutrition.csv"
 
 const UNIT_DICT = Dict("g" => 1u"g",
                        "mg" => 1u"mg",

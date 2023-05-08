@@ -78,7 +78,8 @@ function format_nutrition(df::DataFrame)
                    quantity = Quantity[],
                    is_sub = Bool[],
                    type = String[],
-                   some_missing = Bool[])
+                   some_missing = Bool[],
+                   minimum = Quantity[])
     for tp in types
         inds = findall(x -> !ismissing(x) && x == tp, df.category)
         dfs = df[inds, :]
@@ -88,6 +89,7 @@ function format_nutrition(df::DataFrame)
         full_inds = full_inds[sp]
         full_nms = dfs.name[full_inds]
         qts = dfs.quantity[full_inds]
+        mins = dfs.minimum_requirement[full_inds]
         is_sub = fill(false, length(full_inds))
         some_missing = dfs.some_missing[full_inds]
 
@@ -100,12 +102,14 @@ function format_nutrition(df::DataFrame)
             insert!(qts, pind + 1, qt)
             insert!(is_sub, pind + 1, true)
             insert!(some_missing, pind + 1, dfs.some_missing[ind])
+            insert!(mins, pind + 1, dfs.minimum_requirement[ind])
         end
         tb = vcat(tb, DataFrame(nutrient = full_nms,
                                 quantity = qts,
                                 is_sub = is_sub,
                                 type = tp,
-                                some_missing = some_missing))
+                                some_missing = some_missing,
+                                minimum = mins))
     end
 
     for i = 1:nrow(tb)
@@ -146,15 +150,19 @@ function format_nutrition(df::DataFrame)
     # tb[!, "cal_percs"] = cal_percs
     # tb[!, "calories"] = cals
     tb[!, "pretty"] = [tb.is_sub[i] ? "    " * tb.nutrient[i] : tb.nutrient[i] for i = 1:nrow(tb)]
-
     max_name = maximum(length.(tb.pretty))
     tb[!, "pretty_quant"] = [pretty_quant(x, sigdigits = 3) for x in tb.quantity]
     max_quant = maximum(length.(tb.pretty_quant))
+    tb[!, "pretty_min"] = [pretty_quant(x, sigdigits = 3) for x in tb.minimum]
+    max_min = maximum(length.(tb.pretty_min))
     # tb[!, "pretty_cal"] = [pretty_quant(x, sigdigits = 3) for x in tb.calories]
     # max_cal = maximum(length.(tb.pretty_cal))
     # tb[!, "pretty_perc"] = [isnothing(x) ? "" : string(round(x, digits = 1)) * "%" for x in tb.cal_percs]
     # max_perc = maximum(length.(tb.pretty_perc))
-    s = "Nutrition Facts:\n\n"
+    s = pad_string("Nutrition Facts:", max_name + 8, side=:right)
+    s *= "   " * pad_string("Amount", max_quant, side = :right)
+    s *= "   " * pad_string("Minimum", max_min, side = :right)
+    s *= "\n"
     for i = 1:nrow(tb)
         if i == 1 || tb.type[i] != tb.type[i - 1]
             s *= tb.type[i] * "\n"
@@ -162,6 +170,7 @@ function format_nutrition(df::DataFrame)
         nm = tb.some_missing[i] ? tb.pretty[i] * "*" : tb.pretty[i]
         s *= "\t" * pad_string(nm, max_name, side = :right)
         s *= "   " * pad_string(tb.pretty_quant[i], max_quant, side = :left)
+        s *= "   " * pad_string(tb.pretty_min[i], max_min, side = :left)
         # s *= "   " * pad_string(tb.pretty_cal[i], max_cal, side = :left)
         # s *= "   " * pad_string(tb.pretty_perc[i], max_perc, side = :left)
         s *= "\n"
