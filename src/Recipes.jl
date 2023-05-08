@@ -319,13 +319,37 @@ function nutrition_facts(recipe::Recipe;
 
     dict[!, "quantity"] = quants
     dict[!, "some_missing"] = some_missing
-    requirements.minimum_requirement = requirements.minimum_requirement .*
-            [UNIT_DICT[x] for x in requirements.unit_requirement]
+
     cals_ind = findfirst(isequal("Energy"), dict.name)
     cals = dict.quantity[cals_ind]
-    requirements.minimum_requirement = requirements.minimum_requirement .* (cals / 1000u"kcal")
+    water_ind = findfirst(isequal("Water"), dict.name)
+    water = dict.quantity[water_ind]
+
+    total_weight = sum([i.quantity for i in ingredients])
+    dry_weight = total_weight - water
+
+    reqs = [parse_and_scale_requirement(
+        requirements, i, cals, dry_weight) for i = 1:nrow(requirements)]
+
+    requirements.min_requirement = [r[1] for r in reqs]
+    requirements.max_requirement = [r[2] for r in reqs]
+    # requirements.min_requirement = requirements.min_requirement .* (cals / 1000u"kcal")
     dict = outerjoin(dict, requirements, on = [:name => :nutrient])
     format_nutrition(dict)
+end
+
+function parse_and_scale_requirement(requirements, ind, calories, dry_weight)
+    qmin = requirements.min_requirement[ind]
+    qmax = requirements.max_requirement[ind]
+    q = [qmin, qmax]
+    comp = requirements.comparison[ind]
+    if comp == "per 1000 kcal"
+        return q .* (UNIT_DICT[requirements.unit_requirement[ind]] * (calories / 1000u"kcal"))
+    elseif comp == "% dry weight"
+        return q .* (dry_weight / 100)
+    else
+        error("unrecognized comparison")
+    end
 end
 
 

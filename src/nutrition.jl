@@ -79,7 +79,8 @@ function format_nutrition(df::DataFrame)
                    is_sub = Bool[],
                    type = String[],
                    some_missing = Bool[],
-                   minimum = Quantity[])
+                   minimum = Quantity[],
+                   maximum = Quantity[])
     for tp in types
         inds = findall(x -> !ismissing(x) && x == tp, df.category)
         dfs = df[inds, :]
@@ -89,7 +90,8 @@ function format_nutrition(df::DataFrame)
         full_inds = full_inds[sp]
         full_nms = dfs.name[full_inds]
         qts = dfs.quantity[full_inds]
-        mins = dfs.minimum_requirement[full_inds]
+        mins = dfs.min_requirement[full_inds]
+        maxs = dfs.max_requirement[full_inds]
         is_sub = fill(false, length(full_inds))
         some_missing = dfs.some_missing[full_inds]
 
@@ -102,14 +104,16 @@ function format_nutrition(df::DataFrame)
             insert!(qts, pind + 1, qt)
             insert!(is_sub, pind + 1, true)
             insert!(some_missing, pind + 1, dfs.some_missing[ind])
-            insert!(mins, pind + 1, dfs.minimum_requirement[ind])
+            insert!(mins, pind + 1, dfs.min_requirement[ind])
+            insert!(maxs, pind + 1, dfs.max_requirement[ind])
         end
         tb = vcat(tb, DataFrame(nutrient = full_nms,
                                 quantity = qts,
                                 is_sub = is_sub,
                                 type = tp,
                                 some_missing = some_missing,
-                                minimum = mins))
+                                minimum = mins,
+                                maximum = maxs))
     end
 
     for i = 1:nrow(tb)
@@ -155,13 +159,17 @@ function format_nutrition(df::DataFrame)
     max_quant = maximum(length.(tb.pretty_quant))
     tb[!, "pretty_min"] = [pretty_quant(x, sigdigits = 3) for x in tb.minimum]
     max_min = maximum(length.(tb.pretty_min))
+    tb[!, "pretty_max"] = [pretty_quant(x, sigdigits = 3) for x in tb.maximum]
+    max_max = maximum(length.(tb.pretty_max))
     # tb[!, "pretty_cal"] = [pretty_quant(x, sigdigits = 3) for x in tb.calories]
     # max_cal = maximum(length.(tb.pretty_cal))
     # tb[!, "pretty_perc"] = [isnothing(x) ? "" : string(round(x, digits = 1)) * "%" for x in tb.cal_percs]
     # max_perc = maximum(length.(tb.pretty_perc))
     s = pad_string("Nutrition Facts:", max_name + 8, side=:right)
     s *= "   " * pad_string("Amount", max_quant, side = :right)
-    s *= "   " * pad_string("Minimum", max_min, side = :right)
+    s *= "   " * pad_string("Min", max_min, side = :right)
+    s *= "   " * pad_string("Max", max_max, side = :right)
+
     println(s)
     for i = 1:nrow(tb)
         if i == 1 || tb.type[i] != tb.type[i - 1]
@@ -171,23 +179,34 @@ function format_nutrition(df::DataFrame)
         s = "\t" * pad_string(nm, max_name, side = :right)
         s *= "   " * pad_string(tb.pretty_quant[i], max_quant, side = :left)
         s *= "   " * pad_string(tb.pretty_min[i], max_min, side = :left)
+        s *= "   " * pad_string(tb.pretty_max[i], max_max, side = :left)
+
         # s *= "   " * pad_string(tb.pretty_cal[i], max_cal, side = :left)
         # s *= "   " * pad_string(tb.pretty_perc[i], max_perc, side = :left)
         s *= "\n"
         q = tb.quantity[i]
-        m = tb.minimum[i]
-        m = ismissing(m) ? m : convert(Quantity{Float64}, m) # not sure why I need this?
-        if ismissing(m)
+        mn = tb.minimum[i]
+        mx = tb.maximum[i]
+        mn = ismissing(mn) ? mn : convert(Quantity{Float64}, mn) # not sure why I need this?
+        mx = ismissing(mx) ? mx : convert(Quantity{Float64}, mx) # not sure why I need this?
+
+        if ismissing(mn)
             print(s)
-        elseif m > q
-            printstyled(s, color = :red)
         else
-            printstyled(s, color = :green)
+            satisfies = true
+            if !(ismissing(mn) || q > mn)
+                satisfies = false
+            end
+            if !(ismissing(mx) || q < mx)
+                satisfies = false
+            end
+            if satisfies
+                printstyled(s, color = :green)
+            else
+                printstyled(s, color = :red)
+            end
         end
     end
-    s
-
-
 end
 
 function pad_string(s::String, n::Int; side = :left)

@@ -1,16 +1,17 @@
-﻿nutrient,unit_requirement,minimum_requirement
-Protein,g,45.0
-Arginine,g,1.28
-Histidine,g,0.48
-Isoleucine,g,0.95
-Leucine,g,1.7
-Lysine,g,1.58
-Methionine,g,0.83
-Cystine,g,1.63
-Phenylalanine,g,1.13
-Tyrosine,g,1.85
-Threonine,g,1.2
-Tryptophan,g,0.4
-Valine,g,1.23
-Total lipid (fat),g,13.8
-"18:2 n-6 c,c",g,2.8
+﻿nutrient,unit_requirement,comparison,min_requirement,max_requirement
+Protein,g,per 1000 kcal,45.0,
+Arginine,g,per 1000 kcal,1.28,
+Histidine,g,per 1000 kcal,0.48,
+Isoleucine,g,per 1000 kcal,0.95,
+Leucine,g,per 1000 kcal,1.7,
+Lysine,g,per 1000 kcal,1.58,
+Methionine,g,per 1000 kcal,0.83,
+Cystine,g,per 1000 kcal,1.63,
+Phenylalanine,g,per 1000 kcal,1.13,
+Tyrosine,g,per 1000 kcal,1.85,
+Threonine,g,per 1000 kcal,1.2,
+Tryptophan,g,per 1000 kcal,0.4,
+Valine,g,per 1000 kcal,1.23,
+Total lipid (fat),g,per 1000 kcal,13.8,
+"18:2 n-6 c,c",g,per 1000 kcal,2.8,
+"Fiber, total dietary",,% dry weight,2.5,4.5
