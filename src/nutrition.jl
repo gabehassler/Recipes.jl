@@ -162,18 +162,28 @@ function format_nutrition(df::DataFrame)
     s = pad_string("Nutrition Facts:", max_name + 8, side=:right)
     s *= "   " * pad_string("Amount", max_quant, side = :right)
     s *= "   " * pad_string("Minimum", max_min, side = :right)
-    s *= "\n"
+    println(s)
     for i = 1:nrow(tb)
         if i == 1 || tb.type[i] != tb.type[i - 1]
-            s *= tb.type[i] * "\n"
+            println(tb.type[i])
         end
         nm = tb.some_missing[i] ? tb.pretty[i] * "*" : tb.pretty[i]
-        s *= "\t" * pad_string(nm, max_name, side = :right)
+        s = "\t" * pad_string(nm, max_name, side = :right)
         s *= "   " * pad_string(tb.pretty_quant[i], max_quant, side = :left)
         s *= "   " * pad_string(tb.pretty_min[i], max_min, side = :left)
         # s *= "   " * pad_string(tb.pretty_cal[i], max_cal, side = :left)
         # s *= "   " * pad_string(tb.pretty_perc[i], max_perc, side = :left)
         s *= "\n"
+        q = tb.quantity[i]
+        m = tb.minimum[i]
+        m = ismissing(m) ? m : convert(Quantity{Float64}, m) # not sure why I need this?
+        if ismissing(m)
+            print(s)
+        elseif m > q
+            printstyled(s, color = :red)
+        else
+            printstyled(s, color = :green)
+        end
     end
     s
 
