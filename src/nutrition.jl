@@ -193,6 +193,8 @@ function format_nutrition(df::DataFrame, weight::Quantity)
 
         if ismissing(mn)
             print(s)
+        elseif ismissing(q)
+            printstyled(s, color = :yellow)
         else
             satisfies = true
             if !(ismissing(mn) || q > mn)
