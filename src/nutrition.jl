@@ -124,8 +124,6 @@ function format_nutrition(df::DataFrame, weight::Quantity)
         end
     end
 
-    @show tb
-
     # cals = [get_calories(tb.nutrient[i], tb.quantity[i]) for i = 1:nrow(tb)]
     # parent = nothing
     # parent_i = nothing
@@ -240,4 +238,35 @@ end
 
 function pretty_quant(q::Nothing; kwargs...)
     return ""
+end
+
+
+function get_calories(recipe::Recipe)
+    cals = 0u"kcal"
+    for i in recipe.ingredients
+        cals += get_calories(i)
+    end
+    cals
+end
+
+function get_calories(ingredient::Ingredient)
+    if isnothing(ingredient.nutrients)
+        error("No nutrition information available")
+    end
+    nutrition = ingredient.nutrients
+    ind = findfirst(isequal("Energy"), nutrition.nutrients)
+    return nutrition.quantities[ind]
+end
+
+function scale_to_calories(recipe::Recipe, calories::Quantity;
+                           reset_serving::Bool = false)
+
+    @assert unit(calories) == u"kcal"
+    original_serving = recipe.amount
+    r_cals = get_calories(recipe)
+    recipe = recipe * (calories / r_cals)
+    if reset_serving
+        recipe.amount = original_serving
+    end
+    return recipe
 end

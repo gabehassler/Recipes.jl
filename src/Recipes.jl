@@ -50,11 +50,6 @@ function Ingredient(name, quantity)
     return Ingredient(name, quantity = quantity)
 end
 
-include("nutrition.jl")
-include("nutritionix_keys.jl")
-include("nutritionix.jl")
-
-
 
 
 import Base.string
@@ -129,6 +124,13 @@ end
 function *(r::Recipe, s::Real)
     s * r
 end
+
+include("nutrition.jl")
+include("nutritionix_keys.jl")
+include("nutritionix.jl")
+
+
+
 
 const RECIPE = "recipe:"
 const MAKES = "makes:"
