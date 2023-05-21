@@ -189,7 +189,7 @@ function format_nutrition(df::DataFrame, weight::Quantity)
         mn = ismissing(mn) ? mn : convert(Quantity{Float64}, mn) # not sure why I need this?
         mx = ismissing(mx) ? mx : convert(Quantity{Float64}, mx) # not sure why I need this?
 
-        if ismissing(mn)
+        if ismissing(mn) && ismissing(mx)
             print(s)
         elseif ismissing(q)
             printstyled(s, color = :yellow)
