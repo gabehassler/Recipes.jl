@@ -1,0 +1,15 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- sweet potato (50 g): skinned
+- white rice (50 g)
+- chicken (75 g)
+- canola oil (5 g)
+
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly

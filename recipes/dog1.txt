@@ -1,0 +1,15 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- mixed berries (75 g)
+- white rice (100 g)
+- canned salmon (200 g)
+
+
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly

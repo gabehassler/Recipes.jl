@@ -1,0 +1,14 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- potato (100 g): skinned
+- canned salmon (100 g)
+- spinach (30 g)
+- olive oil (10 g)
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly

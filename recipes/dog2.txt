@@ -1,0 +1,16 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- brown rice (100 g)
+- hard boiled egg (100 g)
+- olive oil (5 g)
+- carrots (25 g)
+
+
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly

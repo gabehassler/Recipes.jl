@@ -1,0 +1,13 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- tofu (100 g)
+- white rice (30 g)
+- peanuts (10 g)
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly

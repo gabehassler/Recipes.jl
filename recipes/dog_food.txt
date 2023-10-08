@@ -1,0 +1,18 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- brown rice (571 g)
+- hard boiled egg (350 g)
+- canned tuna (142 g)
+- olive oil (20 g)
+- carrots (75 g)
+- mixed berries (75 g)
+
+
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly

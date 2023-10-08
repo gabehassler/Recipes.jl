@@ -85,6 +85,27 @@ function *(x::Ingredient, s::Real)
     s * x
 end
 
+import Base.+
+function +(a::Ingredient, b::Ingredient)
+    if a.name != b.name
+        error("cannot add two different ingredients")
+    end
+    if (a.nutrients.nutrients != b.nutrients.nutrients)
+        error("ingredients are the same but they have different nutritional profiles")
+    end
+    @show a
+    @show b
+    return Ingredient(
+        a.name,
+        a.quantity + b.quantity,
+        a.prep,
+        Nutrition(
+            copy(a.nutrients.nutrients),
+            a.nutrients.quantities + b.nutrients.quantities,
+            a.nutrients.reference_weight + b.nutrients.reference_weight)
+    )
+end
+
 *(s::Real, x::Nothing) = nothing
 *(x::Nothing, s::Real) = s * x
 
@@ -353,6 +374,24 @@ function parse_and_scale_requirement(requirements, ind, calories, dry_weight)
         error("unrecognized comparison")
     end
 end
+
+function gather_ingredients(recipes::Recipe...)
+    ingredients = vcat([r.ingredients for r in recipes]...)
+    names = [i.name for i in ingredients]
+    new_ingredients = Ingredient[]
+    new_names = String[]
+    for ingredient in ingredients
+        ind = findfirst(isequal(ingredient.name), new_names)
+        if isnothing(ind)
+            push!(new_ingredients, ingredient)
+            push!(new_names, ingredient.name)
+        else
+            new_ingredients[ind] += ingredient
+        end
+    end
+    return new_ingredients
+end
+
 
 
 end # module
