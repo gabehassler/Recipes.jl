@@ -1,0 +1,13 @@
+Recipe: test dog food
+Makes: 0.40379541108986616 serving
+
+Ingredients:
+- blueberry (50 g)
+- canned salmon (50 g)
+- tofu (100 g)
+
+Instructions:
+- mix together
+
+Note:
+- cook all lightly
